@@ -1,0 +1,20 @@
+[setup]
+paperspace > launch jupyter notebook 
+
+[notes]
+neural networks are just matrix multiplications
+PyTorch = Python implementation of neural networks
+using fastai library | built on top of PyTorch 
+fastai provides even higher level abstractions for developers to implement neural networks
+without having to get into all the nitty-gritty details
+
+[jupyter notebook environment]
+create "code" and "data" folders inside folder called "WatchProj"
+zip "images" folder and upload to "data" folder
+create new .ipynb notebook in "data" folder to unzip "images.zip" and unzip to "data" folder
+
+**edit Model Classification.ipynb accordingly** 
+
+[local machine]
+create "notebooks" folder in "WatchProj" folder, download "Classification Model.ipynb" (from jupyter notebooks environment), and add it to "notebooks" folder
+create "models" folder in "WatchProj" folder, download "classifier.pkl" (from jupyter notebooks environment), and add it to "models" folder

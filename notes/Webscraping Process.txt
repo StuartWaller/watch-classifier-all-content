@@ -1,0 +1,97 @@
+[###############################]
+[#Part 1: Webscraping with Ruby#]
+[###############################]
+
+[cmder]
+cd Desktop/ML-Project/scraper
+atom . 
+**create "Gemfile" and "scraper.rb" in "scraper" directory**
+ruby -v (using ruby 2.7.1) 
+**add current ruby version and necessary libraries to Gemfile**
+bundle (loads libraries from Gemfile)
+pry (enters development environment) 
+require "nokogiri" 
+require "watir" 
+browser = Watir::Browser.new(:chrome) (instantiates a new browser instance)
+browser.goto("chrono24.com") 
+
+[notes]
+- chrono24.com contains images and prices of many different brands of watches
+- type "IWC" into search box --> get this url: https://www.chrono24.com/iwc/index.htm?dosearch=true&query=IWC
+- this url: https://www.chrono24.com/iwc yields the same page, which shows the convention for sorting by brand is simple:
+https://www.chrono24.com/{brand name}
+- no exact number of images to make classifier work correctly, but around 300 per brand should be good
+
+[cmder]
+doc = Nokogiri::HTML.parse(browser.html) (pares browser | must be at https://www.chrono24.com/rolex/index.htm (or any brand))
+**right click on development webpage and "inspect", then right click on an image and "inspect"**
+(it seems the image urls are located in the <div class="article-image-container") 
+**spam keys until end and/or press "q" if necessary to return to pry(main)>**
+doc.css(".article-image-container").count (yields "65", which means there are about 65 images per page)
+
+[notes]
+- 300 / 65 = 4.6, so the first 5 pages contain roughly 300 images (the desired count per brand)
+- the simplicity of the url convention becomes apparent on the second page:
+https://www.chrono24.com/rolex/index-2.htm (page 2) 
+- the information above provides a basic outline for the scrpaer
+
+**edit scraper.py accordingly**
+
+[notes]
+- inside <div class="article-image-container" is <div class="content", which contains an image tag inside of it:
+<img src="https://cdn2.chrono24.com/images/uhren/images_35/s3/10822335_s210_v1553641998205.jpg"
+- https://cdn2.chrono24.com/images/uhren/images_35/s3/10822335_s210_v1553641998205.jpg is an example of a desired, scrapable url
+- fortunately, each image is 210 x 210 pixels | if not, preprocessing would be necessary
+- given a folder containing images of varying resolutions, simply cd (folder name) and use this silver bullet command: 
+mogrify -verbose -type truecolor -format jpg -thumbnail 512x512^ -gravity center -extent 512x512 *
+
+[cmder]
+doc.css(".article-image-container")[0].at_css(".content img")["src"] (yields first .jpg url on page)
+doc.css(".article-image-container")[1].at_css(".content img")["src"] (yields second .jpg url on page)
+doc.css(".article-image-container")[55].at_css(".content img")["src"] (yields "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7")
+(no image source available because the image was not loaded: must scroll down to bottom of page and reparse page to collect url)
+doc = Nokogiri::HTML.parse(browser.html) (reparses page)
+doc.css(".article-image-container")[55].at_css(".content img")["src"] (yields 56th .jpg url on page)
+
+[notes]
+- page loads images in an asynchronous fashion (images load as they are scrolled to, not all at once as the page is first instantiated)
+- the scraping script must tell the webpage to scroll down all the way to the bottom of the page and then parse 
+(in order to effectively scrape all urls on page as described above)
+
+[development webpage]
+"inspect" > "Console": window.scrollBy(0, 500) (each row is around 500 pixels, so this commands the webpage move down a single row)
+
+[cmder]
+browser.execute_script("window.scrollBy(0, 500)") (yields same output as above | except in pry(main)> console instead of webpage console)
+
+[development webpage]
+"inspect" > right click on price of watch > "inspect" (price located in <strong tag)
+
+[cmder]
+doc.at_css(".article-item-container .article-price strong").text (yields ${price})
+doc.at_css(".article-item-container .article-price-container .article-price strong").text (yields ${price})
+
+[notes]
+- both the above commands yield the price, one path is just more specific 
+- similarly accessing directories, scraping the desired information on a webpage requires the correct path
+- the . precedes the <div class=" " 
+- strong is the closest purple text to the price 
+-doc.at_css(".article-item-container .article-image-container .content img")["src"] yields image url
+- the image url is in <img src ="{image url}" in <div class="content" 
+- img is the closest purple text to the url  
+- src is after img and in the same < tag
+
+**edit scraper.rb accordingly** 
+**make "data" folder in "scraper" folder**
+
+[cmder]
+ruby scraper.rb
+
+**create "image_downloader.rb" in "scraper" folder
+**make "images" folder in "scraper" folder**
+**must run ruby image_downloader.rb in linux terminal in virtual machine**
+
+[notes]
+- Ruby and Windows 10 are not very compatible
+
+

@@ -1,0 +1,6 @@
+ruby "2.7.1" # our version of ruby
+
+# 3 libraries
+gem "nokogiri" # an xml parser
+gem "watir"  # sits atop selenium | use for browser automation
+gem "pry" # runtime developer console
